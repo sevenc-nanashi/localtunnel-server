@@ -1,5 +1,5 @@
 import http from "http"
-import net from "net"
+import net, { Socket } from "net"
 import assert from "assert"
 
 import TunnelAgent from "./TunnelAgent"
@@ -24,12 +24,12 @@ describe("TunnelAgent", () => {
     // in this test we wait for the socket to be connected
     await new Promise((resolve) => sock.once("connect", resolve))
 
-    const agentSock = await new Promise((resolve, reject) => {
-      agent.createConnection({}, (err, sock) => {
+    const agentSock = await new Promise<Socket>((resolve, reject) => {
+      agent.createConnection({}, (err: unknown, sock: Socket | null) => {
         if (err) {
           reject(err)
         }
-        resolve(sock)
+        resolve(sock!)
       })
     })
 
@@ -57,7 +57,7 @@ describe("TunnelAgent", () => {
     await Promise.all([p1, p2])
 
     const sock3 = net.createConnection({ port: info.port })
-    const p3 = await new Promise((resolve) => sock3.once("close", resolve))
+    await new Promise((resolve) => sock3.once("close", resolve))
 
     agent.destroy()
     sock1.destroy()
@@ -73,13 +73,13 @@ describe("TunnelAgent", () => {
 
     // create a promise for the next connection
     let fulfilled = false
-    const waitSockPromise = new Promise((resolve, reject) => {
-      agent.createConnection({}, (err, sock) => {
+    const waitSockPromise = new Promise<Socket>((resolve, reject) => {
+      agent.createConnection({}, (err: unknown, sock: Socket | null) => {
         fulfilled = true
         if (err) {
           reject(err)
         }
-        resolve(sock)
+        resolve(sock!)
       })
     })
 
@@ -91,7 +91,7 @@ describe("TunnelAgent", () => {
     const sock = net.createConnection({ port: info.port })
     await new Promise((resolve) => sock.once("connect", resolve))
 
-    const anotherAgentSock = await waitSockPromise
+    await waitSockPromise
     agent.destroy()
     sock.destroy()
   })
@@ -159,7 +159,7 @@ describe("TunnelAgent", () => {
         super()
       }
 
-      createConnection(options, cb) {
+      createConnection(_options: unknown, cb: (err: Error) => void) {
         cb(new Error("foo"))
       }
     }
@@ -173,8 +173,10 @@ describe("TunnelAgent", () => {
       agent: agent,
     }
 
-    const err = await new Promise((resolve) => {
-      const req = http.get(opt, (res) => {})
+    const err = await new Promise<Error>((resolve) => {
+      const req = http.get(opt, (_res) => {
+        null
+      })
       req.once("error", resolve)
     })
     assert.equal(err.message, "foo")

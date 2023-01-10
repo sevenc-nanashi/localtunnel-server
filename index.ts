@@ -65,5 +65,3 @@ process.on("uncaughtException", (err) => {
 process.on("unhandledRejection", (reason, _promise) => {
   log.error(reason)
 })
-
-// vim: ft=typescript

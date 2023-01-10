@@ -1,5 +1,5 @@
 import assert from "assert"
-import net from "net"
+import net, { Socket } from "net"
 
 import ClientManager from "./ClientManager"
 
@@ -18,7 +18,7 @@ describe("ClientManager", () => {
 
   it("should create a new client with id", async () => {
     const manager = new ClientManager()
-    const client = await manager.newClient("foobar")
+    await manager.newClient("foobar")
     assert(manager.hasClient("foobar"))
     manager.removeClient("foobar")
   })
@@ -38,7 +38,7 @@ describe("ClientManager", () => {
     const manager = new ClientManager()
     const client = await manager.newClient("foobar")
 
-    const socket = await new Promise((resolve) => {
+    const socket = await new Promise<Socket>((resolve) => {
       const netClient = net.createConnection({ port: client.port }, () => {
         resolve(netClient)
       })
@@ -58,9 +58,9 @@ describe("ClientManager", () => {
   it("should remove correct client once it goes offline", async () => {
     const manager = new ClientManager()
     const clientFoo = await manager.newClient("foo")
-    const clientBar = await manager.newClient("bar")
+    await manager.newClient("bar")
 
-    const socket = await new Promise((resolve) => {
+    const socket = await new Promise<Socket>((resolve) => {
       const netClient = net.createConnection({ port: clientFoo.port }, () => {
         resolve(netClient)
       })
@@ -80,7 +80,7 @@ describe("ClientManager", () => {
 
   it("should remove clients if they do not connect within 5 seconds", async () => {
     const manager = new ClientManager()
-    const clientFoo = await manager.newClient("foo")
+    await manager.newClient("foo")
     assert(manager.hasClient("foo"))
 
     // wait past grace period (1s)

@@ -18,7 +18,7 @@ class ClientManager {
   debug: Debug.Debugger
   graceTimeout: null
 
-  constructor(opt: Partial<Option>) {
+  constructor(opt: Partial<Option> = {}) {
     this.opt = {
       max_tcp_sockets: 10,
       ...opt,
@@ -41,7 +41,7 @@ class ClientManager {
   // create a new tunnel with `id`
   // if the id is already used, a random id is assigned
   // if the tunnel could not be created, throws an error
-  async newClient(id: string, schema: string, host: string) {
+  async newClient(id = "", schema = "http", host = "localhost") {
     const clients = this.clients
     const stats = this.stats
 

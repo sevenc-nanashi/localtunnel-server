@@ -2,7 +2,7 @@ import request from "supertest"
 import assert from "assert"
 import { Server as WebSocketServer } from "ws"
 import WebSocket from "ws"
-import net from "net"
+import net, { AddressInfo } from "net"
 
 import createServer from "./server"
 
@@ -49,13 +49,13 @@ describe("Server", () => {
     const res = await request(server).get("/websocket-test")
     const localTunnelPort = res.body.port
 
-    const wss = await new Promise((resolve) => {
+    const wss = await new Promise<WebSocketServer>((resolve) => {
       const wsServer = new WebSocketServer({ port: 0 }, () => {
         resolve(wsServer)
       })
     })
 
-    const websocketServerPort = wss.address().port
+    const websocketServerPort = (wss.address() as AddressInfo).port
 
     const ltSocket = net.createConnection({ port: localTunnelPort })
     const wsSocket = net.createConnection({ port: websocketServerPort })
@@ -67,17 +67,20 @@ describe("Server", () => {
       })
     })
 
-    const ws = new WebSocket("http://localhost:" + server.address().port, {
-      headers: {
-        host: hostname + ".example.com",
-      },
-    })
+    const ws = new WebSocket(
+      "ws://localhost:" + (wss.address() as AddressInfo).port,
+      {
+        headers: {
+          host: hostname + ".example.com",
+        },
+      }
+    )
 
     ws.on("open", () => {
       ws.send("something")
     })
 
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       ws.once("message", (msg) => {
         assert.equal(msg, "something")
         resolve()
@@ -98,9 +101,8 @@ describe("Server", () => {
 
     // request a new client called foobar-test
     {
-      const res = await request(server).get("/foobar-test")
+      await request(server).get("/foobar-test")
     }
-
     {
       const res = await request(server).get("/api/tunnels/foobar-test/status")
       assert.equal(res.statusCode, 200)

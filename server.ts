@@ -15,10 +15,8 @@ export default function (
     secure: boolean
     landing: string
     max_tcp_sockets: number
-  }>
+  }> = {}
 ) {
-  opt = opt || {}
-
   const validHosts = opt.domain ? [opt.domain] : undefined
   const myTldjs = tldjs.fromUserSettings({ validHosts })
   const landingPage = opt.landing || "https://localtunnel.github.io/www/"
