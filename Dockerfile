@@ -1,13 +1,14 @@
-FROM node:10.1.0-alpine
+FROM node:16.17.0-alpine
 
 WORKDIR /app
 
-COPY package.json /app/
-COPY yarn.lock /app/
+RUN npm install -g pnpm
+COPY package.json pnpm-lock.yaml /app/
 
-RUN yarn install --production && yarn cache clean
+RUN pnpm install --frozen-lockfile --prod
 
 COPY . /app
 
+RUN pnpm run build
 ENV NODE_ENV production
-ENTRYPOINT ["node", "-r", "esm", "./bin/server"]
+ENTRYPOINT ["node", "dist/index.js"]
