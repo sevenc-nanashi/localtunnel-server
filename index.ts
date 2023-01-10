@@ -44,10 +44,14 @@ const server = CreateServer({
   domain: argv.domain,
 })
 
-server.listen(argv.port || parseInt(process.env.PORT), argv.address, () => {
-  const address = server.address() as AddressInfo
-  debug("server listening on port: %d", address.port)
-})
+server.listen(
+  argv.port || parseInt(process.env.PORT!) || 80,
+  argv.address,
+  () => {
+    const address = server.address() as AddressInfo
+    debug("server listening on port: %d", address.port)
+  }
+)
 
 process.on("SIGINT", () => {
   process.exit()
