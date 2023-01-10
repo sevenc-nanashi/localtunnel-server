@@ -47,8 +47,8 @@
   },
   "scripts": {
     "test": "tsc --noEmit && mocha --check-leaks --exit --require ts-node/register **/*.test.ts",
-    "start": "tsc -p tsconfig.no-test.json && node ./dist/server.js --port 5000",
-    "dev": "nodemon --exec \"ts-node index.ts --port 5000\" --ext ts,js,json",
+    "start": "tsc -p tsconfig.no-test.json && node ./dist/index.js",
+    "dev": "nodemon --exec \"ts-node index.ts\" --ext ts,js,json",
     "build": "tsc -p tsconfig.no-test.json",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix"
