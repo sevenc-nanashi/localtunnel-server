@@ -17,7 +17,6 @@ const argv = optimist
     describe: "use this flag to indicate proxy over https",
   })
   .options("port", {
-    default: "80",
     describe: "listen on this port for outside requests",
   })
   .options("address", {
@@ -45,7 +44,7 @@ const server = CreateServer({
   domain: argv.domain,
 })
 
-server.listen(argv.port, argv.address, () => {
+server.listen(argv.port || parseInt(process.env.PORT), argv.address, () => {
   const address = server.address() as AddressInfo
   debug("server listening on port: %d", address.port)
 })
